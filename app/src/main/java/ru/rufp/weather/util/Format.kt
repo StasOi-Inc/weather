@@ -37,6 +37,13 @@ object Format {
     fun humidity(value: Double?): String =
         if (value == null) "—" else "${Math.round(value)}%"
 
+    private fun String.toPrecipType(): PrecipType =
+        runCatching { PrecipType.valueOf(this) }.getOrDefault(PrecipType.NONE)
+
+    fun precipTypeName(type: String, context: Context): String = precipTypeName(type.toPrecipType(), context)
+
+    fun precipGlyph(type: String): String = precipGlyph(type.toPrecipType())
+
     fun precipTypeName(type: PrecipType, context: Context): String = when (type) {
         PrecipType.NONE -> context.getString(R.string.precip_none)
         PrecipType.DRIZZLE -> context.getString(R.string.precip_drizzle)

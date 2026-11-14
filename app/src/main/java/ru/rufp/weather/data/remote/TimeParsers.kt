@@ -12,7 +12,7 @@ object TimeParsers {
 
     fun openMeteoTime(value: String, utcOffsetSeconds: Long): Instant {
         val local = LocalDateTime.parse(value, isoFormatter)
-        return local.toInstant(ZoneOffset.ofTotalSeconds(utcOffsetSeconds))
+        return local.toInstant(ZoneOffset.ofTotalSeconds(utcOffsetSeconds.toInt()))
     }
 
     fun metNoTime(value: String): Instant = Instant.parse(value)

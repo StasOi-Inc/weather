@@ -279,7 +279,7 @@ class ForecastRepositoryImpl @Inject constructor(
                     probability = snap.precipProbability ?: 0.05,
                     actual = obs.hadPrecipitation,
                     ageDays = ageDays,
-                    leadHours = lead,
+                    leadHours = lead.toInt(),
                     temperatureError = if (snap.temperature != null && obs.temperature != null) {
                         kotlin.math.abs(snap.temperature - obs.temperature)
                     } else null,
