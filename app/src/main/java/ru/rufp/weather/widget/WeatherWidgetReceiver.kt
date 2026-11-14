@@ -3,6 +3,7 @@ package ru.rufp.weather.widget
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import ru.rufp.weather.work.SyncScheduler
 

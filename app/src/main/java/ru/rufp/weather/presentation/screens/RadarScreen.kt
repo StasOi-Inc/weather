@@ -111,7 +111,7 @@ fun RadarScreen(modifier: Modifier = Modifier, viewModel: RadarViewModel = hiltV
                 runCatching { MapLibre.getInstance(it) }
                 mapView.apply {
                     getMapAsync { map ->
-                        map.setStyle(org.maplibre.android.style.Style.Builder().fromUri(BASE_STYLE_URI)) { style ->
+                        map.setStyle(org.maplibre.android.maps.Style.Builder().fromUri(BASE_STYLE_URI)) { style ->
                             val location = state.location
                             if (location != null) {
                                 style.addSource(

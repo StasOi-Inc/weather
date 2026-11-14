@@ -13,6 +13,7 @@ import ru.rufp.weather.data.local.ObservationEntity
 import ru.rufp.weather.data.local.ObservationsDao
 import ru.rufp.weather.data.local.SnapshotsDao
 import ru.rufp.weather.data.local.SourceMetricsDao
+import ru.rufp.weather.data.local.SourceMetricEntity
 import ru.rufp.weather.data.local.SourceStateDao
 import ru.rufp.weather.data.local.SourceStateEntity
 import ru.rufp.weather.data.remote.OpenMeteoApi
