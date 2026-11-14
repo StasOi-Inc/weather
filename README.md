@@ -88,7 +88,8 @@ weatherapi.key=yyyy
 
 ## Известные ограничения
 
-- CI: сборка проверяется в GitLab (см. `.gitlab-ci.yml`); локальная сборка требует Android SDK.
+- CI: сборка и тесты выполняются в GitHub Actions (`.github/workflows/android.yml`);
+  APK скачивается из артефактов запуска workflow. Локальная сборка требует Android SDK.
 - Базовое покрытие территории РФ обеспечивают Open-Meteo, MET Norway и OpenWeatherMap —
   без платных ключей.
 - Прогноз длиннее 24 часов, push-уведомления, синхронизация устройств — вне объёма v1.
