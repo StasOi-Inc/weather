@@ -46,11 +46,11 @@ class MetricsTest {
 
     @Test
     fun decayReducesOldSamples() {
-        val fresh = listOf(WeightedSample(0.8, false, 0.0, 1))
-        val old = listOf(WeightedSample(0.8, false, 60.0, 1))
-        val freshScore = Metrics.brier(fresh)
-        val oldScore = Metrics.brier(old)
-        assertTrue(oldScore < freshScore)
+        val wrong = WeightedSample(0.8, false, 0.0, 1)
+        val perfect = WeightedSample(1.0, true, 0.0, 1)
+        val freshEnsemble = listOf(wrong, perfect)
+        val oldEnsemble = listOf(wrong.copy(ageDays = 60.0), perfect)
+        assertTrue(Metrics.brier(oldEnsemble) < Metrics.brier(freshEnsemble))
     }
 
     @Test
