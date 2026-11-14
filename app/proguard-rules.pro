@@ -3,9 +3,9 @@
 -dontnote kotlinx.serialization.AnnotationsKt
 -keepclassmembers class kotlinx.serialization.json.** { *** Companion; }
 -keepclasseswithmembers class kotlinx.serialization.json.** { kotlinx.serialization.KSerializer serializer(...); }
--keep,includedescriptorclasses class ru.rufp.weaser.**$$serializer { *; }
--keepclassmembers class ru.rufp.weaser.** { *** Companion; }
--keepclasseswithmembers class ru.rufp.weaser.** { kotlinx.serialization.KSerializer serializer(...); }
+-keep,includedescriptorclasses class ru.rufp.weather.**$$serializer { *; }
+-keepclassmembers class ru.rufp.weather.** { *** Companion; }
+-keepclasseswithmembers class ru.rufp.weather.** { kotlinx.serialization.KSerializer serializer(...); }
 
 # Retrofit
 -keepattributes Signature, Exceptions

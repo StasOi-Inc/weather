@@ -14,5 +14,5 @@ dependencyResolutionManagement {
         maven("https://maven.maplibre.org")
     }
 }
-rootProject.name = "weaser"
+rootProject.name = "weather"
 include(":app")

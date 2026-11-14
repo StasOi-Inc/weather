@@ -16,11 +16,11 @@ val localProps = Properties().apply {
 fun apiKey(name: String): String = "\"${localProps.getProperty(name) ?: ""}\""
 
 android {
-    namespace = "ru.rufp.weaser"
+    namespace = "ru.rufp.weather"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "ru.rufp.weaser"
+        applicationId = "ru.rufp.weather"
         minSdk = 26
         targetSdk = 35
         versionCode = 1

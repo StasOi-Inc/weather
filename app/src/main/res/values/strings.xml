@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Weaser</string>
+    <string name="app_name">Weather</string>
     <string name="widget_description">Осадки на ближайшие часы</string>
 
     <string name="tab_now">Погода</string>
