@@ -16,7 +16,7 @@ jobs:
           distribution: temurin
           java-version: '17'
       - uses: gradle/actions/setup-gradle@v4
-      - run: gradle :app:testDebugUnitTest
+      - run: ./gradlew :app:testDebugUnitTest
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -33,7 +33,7 @@ jobs:
           distribution: temurin
           java-version: '17'
       - uses: gradle/actions/setup-gradle@v4
-      - run: gradle :app:assembleDebug
+      - run: ./gradlew :app:assembleDebug
       - uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk
@@ -50,7 +50,7 @@ jobs:
           distribution: temurin
           java-version: '17'
       - uses: gradle/actions/setup-gradle@v4
-      - run: gradle :app:assembleRelease
+      - run: ./gradlew :app:assembleRelease
       - uses: actions/upload-artifact@v4
         with:
           name: app-release-apk
