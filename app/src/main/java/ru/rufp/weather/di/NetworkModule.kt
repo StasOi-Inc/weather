@@ -16,7 +16,7 @@ import ru.rufp.weather.data.remote.OpenMeteoApi
 import ru.rufp.weather.data.remote.OpenMeteoGeocodingApi
 import ru.rufp.weather.data.remote.RainViewerApi
 import ru.rufp.weather.data.remote.WeatherApiComApi
-import ru.rufp.weather.data.remote.WeatherApis
+import ru.rufp.weather.data.remote.OpenWeatherApi
 import ru.rufp.weather.data.remote.YandexWeatherApi
 import ru.rufp.weather.data.remote.provider.GismeteoProvider
 import ru.rufp.weather.data.remote.provider.MetNoProvider
