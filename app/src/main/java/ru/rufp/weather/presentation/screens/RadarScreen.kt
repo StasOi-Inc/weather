@@ -71,7 +71,8 @@ fun RadarScreen(modifier: Modifier = Modifier, viewModel: RadarViewModel = hiltV
         }
     }
 
-    val mapView = remember {
+    val mapView = remember(context) {
+        MapLibre.getInstance(context)
         MapView(context).apply {
             val lp = android.view.ViewGroup.LayoutParams(
                 android.view.ViewGroup.LayoutParams.MATCH_PARENT,
@@ -106,8 +107,7 @@ fun RadarScreen(modifier: Modifier = Modifier, viewModel: RadarViewModel = hiltV
             )
         }
         AndroidView(
-            factory = {
-                runCatching { MapLibre.getInstance(it) }
+            factory = { _ ->
                 mapView.apply {
                     getMapAsync { map ->
                         map.setStyle(org.maplibre.android.maps.Style.Builder().fromUri(BASE_STYLE_URI)) { style ->
