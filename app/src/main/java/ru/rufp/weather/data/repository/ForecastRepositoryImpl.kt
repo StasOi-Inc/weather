@@ -142,7 +142,11 @@ class ForecastRepositoryImpl @Inject constructor(
         }
 
         saveSnapshots(location.id, fetched, now)
-        fetchObservations(location.id, location.latitude, location.longitude)
+        runCatching {
+            kotlinx.coroutines.withTimeoutOrNull(9_000) {
+                fetchObservations(location.id, location.latitude, location.longitude)
+            }
+        }
         snapshotsDao.pruneOlderThan(location.id, now.minus(35, ChronoUnit.DAYS).toEpochMilli())
 
         if (successful.isEmpty()) return false

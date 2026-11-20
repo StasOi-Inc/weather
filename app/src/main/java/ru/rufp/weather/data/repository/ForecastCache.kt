@@ -7,6 +7,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
@@ -61,7 +62,8 @@ class ForecastCache @Inject constructor(
         }
     }
 
-    fun cached(): CachedForecast? = memory.value
+    suspend fun cached(): CachedForecast? =
+        memory.value ?: flow().first()?.also { memory.value = it }
 
     suspend fun save(forecast: CachedForecast) {
         memory.value = forecast

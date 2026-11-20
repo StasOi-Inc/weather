@@ -60,17 +60,13 @@ class MainViewModel @Inject constructor(
             _state.value = _state.value.copy(loading = true, error = false)
             val hadCache = cache.cached() != null
             val ok = runCatching { forecastRepository.sync() }.getOrDefault(false)
-            if (!ok) {
-                val cached = cache.cached()
-                _state.value = _state.value.copy(
-                    loading = false,
-                    error = cached == null,
-                    offline = hadCache,
-                    forecast = cached
-                )
-            } else {
-                _state.value = _state.value.copy(loading = false, offline = false, error = false)
-            }
+            val cached = cache.cached()
+            _state.value = _state.value.copy(
+                loading = false,
+                error = !ok && cached == null,
+                offline = !ok && hadCache,
+                forecast = cached ?: _state.value.forecast
+            )
         }
     }
 
