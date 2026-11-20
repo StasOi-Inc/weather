@@ -51,7 +51,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-private const val BASE_STYLE_URI = "https://demotiles.maplibre.org/style.json"
+private const val BASE_STYLE_URI = "https://tiles.openfreemap.org/styles/liberty"
 private const val RADAR_SOURCE_ID = "Weather-radar"
 private const val RADAR_LAYER_ID = "Weather-radar-layer"
 private const val MARKER_SOURCE_ID = "Weather-marker"
@@ -81,6 +81,7 @@ fun RadarScreen(modifier: Modifier = Modifier, viewModel: RadarViewModel = hiltV
             layoutParams = lp
         }
     }
+    val mapReady = remember { androidx.compose.runtime.mutableStateOf(false) }
 
     DisposableEffect(Unit) {
         mapView.onCreate(null)
@@ -110,55 +111,59 @@ fun RadarScreen(modifier: Modifier = Modifier, viewModel: RadarViewModel = hiltV
             factory = { _ ->
                 mapView.apply {
                     getMapAsync { map ->
-                        map.setStyle(org.maplibre.android.maps.Style.Builder().fromUri(BASE_STYLE_URI)) { style ->
-                            val location = state.location
-                            if (location != null) {
-                                style.addSource(
-                                    GeoJsonSource(
-                                        MARKER_SOURCE_ID,
-                                        Feature.fromGeometry(
-                                            Point.fromLngLat(location.longitude, location.latitude)
-                                        )
-                                    )
-                                )
-                                style.addLayer(
-                                    CircleLayer(MARKER_LAYER_ID, MARKER_SOURCE_ID).withProperties(
-                                        circleColor("#1A73E8"),
-                                        circleRadius(8f),
-                                        circleOpacity(0.8f)
-                                    )
-                                )
-                                map.cameraPosition = CameraPosition.Builder()
-                                    .target(LatLng(location.latitude, location.longitude))
-                                    .zoom(6.5)
-                                    .build()
-                            }
+                        map.setStyle(org.maplibre.android.maps.Style.Builder().fromUri(BASE_STYLE_URI)) { _ ->
+                            mapReady.value = true
                         }
                     }
                 }
             },
-            update = { _ ->
-                val frames = state.frames
-                if (frames.isEmpty()) return@AndroidView
-                val tileUrl = frames[state.currentIndex.coerceIn(0, frames.size - 1)].tileUrl
-                mapView.getMapAsync { map ->
-                    map.style?.let { style ->
-                        style.removeLayer(RADAR_LAYER_ID)
-                        style.removeSource(RADAR_SOURCE_ID)
-                        style.addSource(
-                            RasterSource(RADAR_SOURCE_ID, TileSet(TILESET_VERSION, tileUrl))
-                        )
-                        style.addLayer(
-                            RasterLayer(RADAR_LAYER_ID, RADAR_SOURCE_ID).withProperties(rasterOpacity(0.75f))
-                        )
-                    }
-                }
-            },
+            update = { _ -> },
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
                 .semantics { contentDescription = mapDescription }
         )
+
+        LaunchedEffect(mapReady.value, state.location, state.frames, state.currentIndex) {
+            if (!mapReady.value) return@LaunchedEffect
+            mapView.getMapAsync { map ->
+                val style = map.style ?: return@getMapAsync
+                val location = state.location
+                if (location != null && style.getSource(MARKER_SOURCE_ID) == null) {
+                    style.addSource(
+                        GeoJsonSource(
+                            MARKER_SOURCE_ID,
+                            Feature.fromGeometry(
+                                Point.fromLngLat(location.longitude, location.latitude)
+                            )
+                        )
+                    )
+                    style.addLayer(
+                        CircleLayer(MARKER_LAYER_ID, MARKER_SOURCE_ID).withProperties(
+                            circleColor("#1A73E8"),
+                            circleRadius(8f),
+                            circleOpacity(0.8f)
+                        )
+                    )
+                    map.cameraPosition = CameraPosition.Builder()
+                        .target(LatLng(location.latitude, location.longitude))
+                        .zoom(6.5)
+                        .build()
+                }
+                val frames = state.frames
+                if (frames.isNotEmpty()) {
+                    val tileUrl = frames[state.currentIndex.coerceIn(0, frames.size - 1)].tileUrl
+                    style.removeLayer(RADAR_LAYER_ID)
+                    style.removeSource(RADAR_SOURCE_ID)
+                    style.addSource(
+                        RasterSource(RADAR_SOURCE_ID, TileSet(TILESET_VERSION, tileUrl))
+                    )
+                    style.addLayer(
+                        RasterLayer(RADAR_LAYER_ID, RADAR_SOURCE_ID).withProperties(rasterOpacity(0.75f))
+                    )
+                }
+            }
+        }
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
