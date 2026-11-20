@@ -16,6 +16,9 @@ val localProps = Properties().apply {
 
 fun apiKey(name: String): String = "\"${localProps.getProperty(name) ?: ""}\""
 
+fun signingProp(name: String, envName: String): String =
+    System.getenv(envName) ?: localProps.getProperty(name) ?: ""
+
 android {
     namespace = "ru.rufp.weather"
     compileSdk = 35
@@ -32,11 +35,28 @@ android {
         buildConfigField("String", "GISMETEO_KEY", apiKey("gismeteo.key"))
     }
 
+    signingConfigs {
+        create("release") {
+            val storeFilePath = signingProp("release.store.file", "RELEASE_STORE_FILE")
+            if (storeFilePath.isNotBlank()) {
+                storeFile = rootProject.file(storeFilePath)
+                storePassword = signingProp("release.store.password", "RELEASE_STORE_PASSWORD")
+                keyAlias = signingProp("release.key.alias", "RELEASE_KEY_ALIAS")
+                keyPassword = signingProp("release.key.password", "RELEASE_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = if (signingProp("release.store.file", "RELEASE_STORE_FILE").isNotBlank()) {
+                signingConfigs.getByName("release")
+            } else {
+                null
+            }
         }
     }
     compileOptions {
