@@ -14,7 +14,8 @@ val localProps = Properties().apply {
     if (f.exists()) f.inputStream().use { load(it) }
 }
 
-fun apiKey(name: String): String = "\"${localProps.getProperty(name) ?: ""}\""
+fun apiKey(name: String, envName: String): String =
+    "\"" + (System.getenv(envName) ?: localProps.getProperty(name) ?: "") + "\""
 
 fun signingProp(name: String, envName: String): String =
     System.getenv(envName) ?: localProps.getProperty(name) ?: ""
@@ -29,10 +30,10 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-        buildConfigField("String", "OWM_KEY", apiKey("openweathermap.key"))
-        buildConfigField("String", "WEATHERAPI_KEY", apiKey("weatherapi.key"))
-        buildConfigField("String", "YANDEX_KEY", apiKey("yandex.key"))
-        buildConfigField("String", "GISMETEO_KEY", apiKey("gismeteo.key"))
+        buildConfigField("String", "OWM_KEY", apiKey("openweathermap.key", "OWM_KEY"))
+        buildConfigField("String", "WEATHERAPI_KEY", apiKey("weatherapi.key", "WEATHERAPI_KEY"))
+        buildConfigField("String", "YANDEX_KEY", apiKey("yandex.key", "YANDEX_KEY"))
+        buildConfigField("String", "GISMETEO_KEY", apiKey("gismeteo.key", "GISMETEO_KEY"))
     }
 
     signingConfigs {
