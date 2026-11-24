@@ -23,9 +23,13 @@ jobs:
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "platforms;android-35" "build-tools;34.0.0" "build-tools;35.0.0"
       - uses: gradle/actions/setup-gradle@v4
-      - run: |
+      - name: Run unit tests
+        run: |
           if [ -f ~/.macbuild/env.sh ]; then . ~/.macbuild/env.sh; fi
-          ./gradlew :app:testDebugUnitTest
+          set -o pipefail
+          ./gradlew :app:compileDebugKotlin :app:compileDebugUnitTestKotlin :app:testDebugUnitTest --continue 2>&1 | \
+            awk '/^e: |error: /{ printf "::error::%s\n", $0 } /^> Task .* FAILED/{ print } { print }' | \
+            tail -n 500
       - uses: actions/upload-artifact@v4
         if: always()
         with:
