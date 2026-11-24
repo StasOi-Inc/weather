@@ -28,6 +28,10 @@ data class ForecastSnapshotEntity(
     val precipType: String?,
     val precipIntensity: Double?,
     val temperature: Double?,
+    val apparentTemperature: Double? = null,
+    val windSpeed: Double? = null,
+    val humidity: Double? = null,
+    val pressure: Double? = null,
     val rawJson: String? = null
 )
 

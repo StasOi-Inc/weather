@@ -22,6 +22,7 @@ object SyncScheduler {
     private const val SYNC_PERIODIC = "Weather_forecast_sync"
     private const val SYNC_ADAPTIVE = "Weather_forecast_sync_adaptive"
     private const val WEIGHTS_RECALC = "Weather_weights_recalc"
+    private const val UPDATE_CHECK = "Weather_update_check"
 
     fun schedule(context: Context) {
         val wm = WorkManager.getInstance(context)
@@ -38,6 +39,15 @@ object SyncScheduler {
             WEIGHTS_RECALC,
             ExistingPeriodicWorkPolicy.KEEP,
             PeriodicWorkRequestBuilder<WeightRecalcWorker>(24, TimeUnit.HOURS).build()
+        )
+        wm.enqueueUniquePeriodicWork(
+            UPDATE_CHECK,
+            ExistingPeriodicWorkPolicy.KEEP,
+            PeriodicWorkRequestBuilder<UpdateCheckWorker>(24, TimeUnit.HOURS)
+                .setConstraints(
+                    Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
+                )
+                .build()
         )
     }
 
@@ -65,11 +75,17 @@ class ForecastSyncWorker @AssistedInject constructor(
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {
-        val ok = runCatching { forecastRepository.sync() }.getOrDefault(false)
-        if (ok) {
-            WeatherWidget().updateAll(applicationContext)
-            val rainImminent = runCatching { forecastRepository.rainImminentNextTwoHours() }.getOrDefault(false)
-            SyncScheduler.scheduleAdaptiveIfRain(applicationContext, rainImminent)
+        try {
+            val ok = forecastRepository.sync()
+            if (ok) {
+                WeatherWidget().updateAll(applicationContext)
+                val rainImminent = forecastRepository.rainImminentNextTwoHours()
+                SyncScheduler.scheduleAdaptiveIfRain(applicationContext, rainImminent)
+            }
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            return Result.success()
         }
         return Result.success()
     }
@@ -83,7 +99,44 @@ class WeightRecalcWorker @AssistedInject constructor(
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {
-        runCatching { forecastRepository.recomputeMetrics() }
+        try {
+            forecastRepository.recomputeMetrics()
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            return Result.success()
+        }
+        return Result.success()
+    }
+}
+
+@HiltWorker
+class UpdateCheckWorker @AssistedInject constructor(
+    @Assisted appContext: Context,
+    @Assisted workerParams: WorkerParameters,
+    private val updateChecker: ru.rufp.weather.update.UpdateChecker,
+    private val updateStorage: ru.rufp.weather.update.UpdateStorage
+) : CoroutineWorker(appContext, workerParams) {
+
+    override suspend fun doWork(): Result {
+        try {
+            val currentCode = applicationContext.packageManager
+                .getPackageInfo(applicationContext.packageName, 0).let { pi ->
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                        pi.longVersionCode
+                    } else {
+                        @Suppress("DEPRECATION")
+                        pi.versionCode.toLong()
+                    }
+                }
+            val result = updateChecker.check(currentCode)
+            if (result.update != null) updateStorage.save(result.update)
+            else if (result.networkOk) updateStorage.clear()
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            return Result.success()
+        }
         return Result.success()
     }
 }

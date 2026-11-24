@@ -61,13 +61,4 @@ object PrecipMappers {
         1279, 1282 -> PrecipType.THUNDERSTORM
         else -> PrecipType.NONE
     }
-
-    fun fromYandexType(type: Int?, temp: Double?): PrecipType = when (type) {
-        null, 0 -> PrecipType.NONE
-        1 -> PrecipType.RAIN
-        2 -> PrecipType.SNOW
-        3, 4 -> PrecipType.WET_SNOW
-        5 -> PrecipType.HAIL
-        else -> if (temp != null && temp < 0.5) PrecipType.SNOW else PrecipType.RAIN
-    }
 }

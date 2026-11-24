@@ -23,7 +23,7 @@ object DatabaseModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): WeatherDatabase =
         Room.databaseBuilder(context, WeatherDatabase::class.java, "weather.db")
-            .fallbackToDestructiveMigration()
+            .addMigrations(WeatherDatabase.MIGRATION_1_2)
             .build()
 
     @Provides

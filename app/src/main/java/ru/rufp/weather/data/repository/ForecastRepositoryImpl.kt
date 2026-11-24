@@ -119,6 +119,8 @@ class ForecastRepositoryImpl @Inject constructor(
                         kotlinx.coroutines.withTimeoutOrNull(9_000) {
                             provider.fetch(GeoPoint(location.latitude, location.longitude), key)
                         }
+                    } catch (e: kotlinx.coroutines.CancellationException) {
+                        throw e
                     } catch (e: Exception) {
                         null
                     }
@@ -167,7 +169,7 @@ class ForecastRepositoryImpl @Inject constructor(
                     RawHour(it.time.toEpochMilli(), it.precipProbability, it.precipIntensity, it.precipType?.name, it.temperature)
                 }
             )
-            forecast.hours.map { h ->
+            forecast.hours.mapIndexed { index, h ->
                 ForecastSnapshotEntity(
                     sourceId = sourceId,
                     locationId = locationId,
@@ -177,7 +179,11 @@ class ForecastRepositoryImpl @Inject constructor(
                     precipType = h.precipType?.name,
                     precipIntensity = h.precipIntensity,
                     temperature = h.temperature,
-                    rawJson = raw
+                    apparentTemperature = h.apparentTemperature,
+                    windSpeed = h.windSpeed,
+                    humidity = h.humidity,
+                    pressure = h.pressure,
+                    rawJson = if (index == 0) raw else null
                 )
             }
         }
@@ -242,10 +248,10 @@ class ForecastRepositoryImpl @Inject constructor(
                         precipIntensity = it.precipIntensity,
                         precipType = it.precipType?.let { t -> runCatching { PrecipType.valueOf(t) }.getOrNull() },
                         temperature = it.temperature,
-                        apparentTemperature = it.temperature,
-                        windSpeed = null,
-                        humidity = null,
-                        pressure = null
+                        apparentTemperature = it.apparentTemperature ?: it.temperature,
+                        windSpeed = it.windSpeed,
+                        humidity = it.humidity,
+                        pressure = it.pressure
                     )
                 }
             )
@@ -373,8 +379,6 @@ class ForecastRepositoryImpl @Inject constructor(
     private fun apiKeyFor(sourceId: String): String? = when (sourceId) {
         "openweathermap" -> BuildConfig.OWM_KEY.takeIf { it.isNotBlank() }
         "weatherapi-com" -> BuildConfig.WEATHERAPI_KEY.takeIf { it.isNotBlank() }
-        "yandex" -> BuildConfig.YANDEX_KEY.takeIf { it.isNotBlank() }
-        "gismeteo" -> BuildConfig.GISMETEO_KEY.takeIf { it.isNotBlank() }
         else -> null
     }
 }

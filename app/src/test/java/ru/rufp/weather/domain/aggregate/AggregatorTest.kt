@@ -53,6 +53,28 @@ class AggregatorTest {
     }
 
     @Test
+    fun weightCalculatorExcludesNaNSource() {
+        val result = WeightCalculator().compute(
+            errors = mapOf("good" to 0.10, "noData" to Double.NaN),
+            totalObservations = 100
+        )
+        assertFalse(result.warmUp)
+        assertTrue("noData" !in result.weights)
+        assertEquals(1.0, result.weights.values.sum(), 1e-9)
+    }
+
+    @Test
+    fun weightCalculatorAllNaNColdStart() {
+        val result = WeightCalculator().compute(
+            errors = mapOf("a" to Double.NaN, "b" to Double.NaN),
+            totalObservations = 100
+        )
+        assertTrue(result.warmUp)
+        assertEquals(0.5, result.weights["a"]!!, 1e-9)
+        assertEquals(0.5, result.weights["b"]!!, 1e-9)
+    }
+
+    @Test
     fun weightCalculatorBetterSourceGetsMoreWeight() {
         val result = WeightCalculator().compute(
             errors = mapOf("good" to 0.10, "bad" to 0.30),

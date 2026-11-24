@@ -36,6 +36,9 @@ interface LocationsDao {
 
     @Query("SELECT COUNT(*) FROM locations")
     suspend fun count(): Int
+
+    @Query("SELECT * FROM locations ORDER BY id LIMIT 1")
+    suspend fun first(): LocationEntity?
 }
 
 @Dao

@@ -1,11 +1,15 @@
 package ru.rufp.weather.presentation.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Pause
@@ -67,7 +71,7 @@ fun RadarScreen(modifier: Modifier = Modifier, viewModel: RadarViewModel = hiltV
     LaunchedEffect(state.playing) {
         while (state.playing) {
             viewModel.advance()
-            delay(800)
+            delay(700)
         }
     }
 
@@ -129,26 +133,35 @@ fun RadarScreen(modifier: Modifier = Modifier, viewModel: RadarViewModel = hiltV
             mapView.getMapAsync { map ->
                 val style = map.style ?: return@getMapAsync
                 val location = state.location
-                if (location != null && style.getSource(MARKER_SOURCE_ID) == null) {
-                    style.addSource(
-                        GeoJsonSource(
-                            MARKER_SOURCE_ID,
-                            Feature.fromGeometry(
-                                Point.fromLngLat(location.longitude, location.latitude)
+                if (location != null) {
+                    if (style.getSource(MARKER_SOURCE_ID) == null) {
+                        style.addSource(
+                            GeoJsonSource(
+                                MARKER_SOURCE_ID,
+                                Feature.fromGeometry(
+                                    Point.fromLngLat(location.longitude, location.latitude)
+                                )
                             )
                         )
-                    )
-                    style.addLayer(
-                        CircleLayer(MARKER_LAYER_ID, MARKER_SOURCE_ID).withProperties(
-                            circleColor("#1A73E8"),
-                            circleRadius(8f),
-                            circleOpacity(0.8f)
+                        style.addLayer(
+                            CircleLayer(MARKER_LAYER_ID, MARKER_SOURCE_ID).withProperties(
+                                circleColor("#1A73E8"),
+                                circleRadius(8f),
+                                circleOpacity(0.8f)
+                            )
                         )
-                    )
-                    map.cameraPosition = CameraPosition.Builder()
-                        .target(LatLng(location.latitude, location.longitude))
-                        .zoom(6.5)
-                        .build()
+                        map.cameraPosition = CameraPosition.Builder()
+                            .target(LatLng(location.latitude, location.longitude))
+                            .zoom(6.5)
+                            .build()
+                    } else {
+                        (style.getSource(MARKER_SOURCE_ID) as? GeoJsonSource)
+                            ?.setGeoJson(
+                                Feature.fromGeometry(
+                                    Point.fromLngLat(location.longitude, location.latitude)
+                                )
+                            )
+                    }
                 }
                 val frames = state.frames
                 if (frames.isNotEmpty()) {
@@ -179,14 +192,60 @@ fun RadarScreen(modifier: Modifier = Modifier, viewModel: RadarViewModel = hiltV
                     else stringResource(R.string.radar_play)
                 )
             }
-            Slider(
-                value = state.currentIndex.toFloat(),
-                onValueChange = { viewModel.selectIndex(it.toInt()) },
-                valueRange = 0f..(state.frames.size - 1).coerceAtLeast(0).toFloat(),
-                modifier = Modifier.weight(1f).padding(horizontal = 12.dp)
-            )
-            Text(text = frameLabel(state), style = MaterialTheme.typography.labelMedium)
+            Column(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                Slider(
+                    value = state.currentIndex.toFloat(),
+                    onValueChange = { viewModel.selectIndex(it.toInt()) },
+                    valueRange = 0f..(state.frames.size - 1).coerceAtLeast(0).toFloat(),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                RadarLegend()
+            }
+            Column(horizontalAlignment = Alignment.End) {
+                if (state.frames.getOrNull(state.currentIndex)?.isNowcast == true) {
+                    Text(
+                        text = stringResource(R.string.radar_forecast_chip),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.tertiary
+                    )
+                }
+                Text(
+                    text = frameLabel(state),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = when {
+                        state.frames.getOrNull(state.currentIndex)?.isNowcast == true ->
+                            MaterialTheme.colorScheme.tertiary
+                        state.currentIndex == state.nowIndex ->
+                            MaterialTheme.colorScheme.primary
+                        else -> MaterialTheme.colorScheme.onSurface
+                    }
+                )
+            }
         }
+    }
+}
+
+@Composable
+private fun RadarLegend() {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            Modifier
+                .height(8.dp)
+                .fillMaxWidth(0.6f)
+                .background(
+                    brush = androidx.compose.ui.graphics.Brush.horizontalGradient(
+                        colors = listOf(
+                            androidx.compose.ui.graphics.Color(0xFF66CC66),
+                            androidx.compose.ui.graphics.Color(0xFFFFEE55),
+                            androidx.compose.ui.graphics.Color(0xFFEE5533)
+                        )
+                    ),
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(4.dp)
+                )
+        )
+        Text(stringResource(R.string.radar_legend_weak), style = MaterialTheme.typography.labelSmall)
+        Spacer(Modifier.width(8.dp))
+        Text(stringResource(R.string.radar_legend_strong), style = MaterialTheme.typography.labelSmall)
     }
 }
 
@@ -196,13 +255,11 @@ private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm", Locale.getDefau
 private fun frameLabel(state: RadarUiState): String {
     if (state.frames.isEmpty()) return ""
     val frame = state.frames[state.currentIndex]
-    val pastFrames = state.frames.filter { !it.isNowcast }
-    val referenceTime = pastFrames.lastOrNull()?.timeSeconds ?: state.frames.first().timeSeconds
-    val offsetMin = ((frame.timeSeconds - referenceTime) / 60).toInt()
+    val offsetMin = frame.offsetMinutes.toInt()
     val time = timeFormatter.format(Instant.ofEpochSecond(frame.timeSeconds).atZone(ZoneId.systemDefault()))
     return when {
-        offsetMin == 0 -> stringResource(R.string.radar_now)
-        offsetMin < 0 -> stringResource(R.string.radar_minus, -offsetMin)
-        else -> stringResource(R.string.radar_plus, offsetMin)
-    } + " " + time
+        frame.isNowcast || offsetMin > 0 -> stringResource(R.string.radar_plus, offsetMin) + " " + time
+        state.currentIndex == state.nowIndex -> stringResource(R.string.radar_now) + " " + time
+        else -> stringResource(R.string.radar_minus, -offsetMin) + " " + time
+    }
 }

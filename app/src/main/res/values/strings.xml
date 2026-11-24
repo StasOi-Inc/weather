@@ -12,6 +12,10 @@
     <string name="wind">Ветер: %1$s м/с</string>
     <string name="humidity">Влажность: %1$s%%</string>
     <string name="pressure">Давление: %1$s мм рт. ст.</string>
+    <string name="wind_label">Ветер</string>
+    <string name="humidity_label">Влажность</string>
+    <string name="pressure_label">Давление</string>
+    <string name="intensity_label">Осадки</string>
     <string name="next_24_hours">24 часа</string>
     <string name="probability">Вероятность осадков</string>
     <string name="intensity_mm_h">%1$s мм/ч</string>
@@ -69,10 +73,26 @@
     <string name="radar_play">Воспроизвести</string>
     <string name="radar_pause">Пауза</string>
     <string name="radar_now">Сейчас</string>
-    <string name="radar_minus">%1$s мин</string>
+    <string name="radar_minus">−%1$s мин</string>
     <string name="radar_plus">+%1$s мин</string>
     <string name="radar_no_frames">Данные радаров недоступны</string>
     <string name="radar_legend">Осадки</string>
+    <string name="radar_forecast_chip">Прогноз</string>
+    <string name="radar_legend_weak">слабые</string>
+    <string name="radar_legend_strong">сильные</string>
+
+    <string name="update_available">Доступна версия %1$s</string>
+    <string name="update_check">Проверить обновления</string>
+    <string name="update_checking">Проверяем…</string>
+    <string name="update_download">Скачать</string>
+    <string name="update_install">Установить</string>
+    <string name="update_later">Позже</string>
+    <string name="update_up_to_date">Установлена последняя версия</string>
+    <string name="update_failed">Не удалось проверить обновления</string>
+    <string name="update_install_permission_hint">Разрешите установку из этого источника в настройках</string>
+    <string name="update_downloading_percent">Скачивание: %1$s%%</string>
+    <string name="update_size">Размер: %1$s МБ</string>
+    <string name="update_ready">Файл загружен, готов к установке</string>
 
     <string name="widget_no_data">Нет данных</string>
     <string name="cd_precip_icon">Значок осадков: %1$s</string>

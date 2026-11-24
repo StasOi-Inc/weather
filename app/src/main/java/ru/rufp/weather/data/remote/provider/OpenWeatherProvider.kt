@@ -25,7 +25,7 @@ class OpenWeatherProvider @Inject constructor(
         val response = api.forecast(location.latitude, location.longitude, key)
         val now = Instant.now().truncatedTo(ChronoUnit.HOURS)
         val limit = now.plus(24, ChronoUnit.HOURS)
-        val hours = response.list.mapNotNull { item ->
+        val threeHourly = response.list.mapNotNull { item ->
             val time = Instant.ofEpochSecond(item.dt)
             if (time.isBefore(now) || time.isAfter(limit)) return@mapNotNull null
             val rainMm = item.rain?.get("3h") ?: 0.0
@@ -43,6 +43,8 @@ class OpenWeatherProvider @Inject constructor(
                 pressure = item.main.pressure?.times(0.750062)
             )
         }
+        val hours = ru.rufp.weather.data.remote.HourlyInterpolator.interpolateToHourly(threeHourly)
+            .filter { !it.time.isBefore(now) && !it.time.isAfter(limit) }
         return ProviderForecast(id, Instant.now(), hours)
     }
 }

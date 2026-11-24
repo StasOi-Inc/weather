@@ -17,13 +17,17 @@ class WeightCalculator {
         totalObservations: Int,
         minObservations: Int = 20
     ): Result {
-        if (errors.isEmpty()) return Result(emptyMap(), true)
+        val validErrors = errors.filter { !it.value.isNaN() }
+        if (validErrors.isEmpty()) {
+            val equal = 1.0 / errors.size
+            return Result(errors.keys.associateWith { equal }, true)
+        }
         if (totalObservations < minObservations) {
             val equal = 1.0 / errors.size
             return Result(errors.keys.associateWith { equal }, true)
         }
-        val raw = errors.mapValues { (_, err) ->
-            if (err.isNaN()) 1.0 / 0.02 else 1.0 / (err.coerceAtLeast(0.0) + 0.02)
+        val raw = validErrors.mapValues { (_, err) ->
+            1.0 / (err.coerceAtLeast(0.0) + 0.02)
         }
         val sum = raw.values.sum()
         return Result(raw.mapValues { it.value / sum }, false)

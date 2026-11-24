@@ -100,7 +100,15 @@ class LocationRepositoryImpl @Inject constructor(
     }
 
     override suspend fun delete(id: Long) {
+        val wasCurrent = dao.current()?.id == id
         dao.delete(id)
+        if (wasCurrent) {
+            if (dao.count() == 0) {
+                ensureDefaultLocation()
+            } else {
+                dao.first()?.let { setCurrent(it.id) }
+            }
+        }
     }
 
     override suspend fun ensureDefaultLocation(): Boolean {

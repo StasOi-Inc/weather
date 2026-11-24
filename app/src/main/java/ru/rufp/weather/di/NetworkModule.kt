@@ -17,13 +17,10 @@ import ru.rufp.weather.data.remote.OpenMeteoGeocodingApi
 import ru.rufp.weather.data.remote.RainViewerApi
 import ru.rufp.weather.data.remote.WeatherApiComApi
 import ru.rufp.weather.data.remote.OpenWeatherApi
-import ru.rufp.weather.data.remote.YandexWeatherApi
-import ru.rufp.weather.data.remote.provider.GismeteoProvider
 import ru.rufp.weather.data.remote.provider.MetNoProvider
 import ru.rufp.weather.data.remote.provider.OpenMeteoProvider
 import ru.rufp.weather.data.remote.provider.OpenWeatherProvider
 import ru.rufp.weather.data.remote.provider.WeatherApiComProvider
-import ru.rufp.weather.data.remote.provider.YandexProvider
 import ru.rufp.weather.domain.provider.ProviderRegistry
 import ru.rufp.weather.domain.provider.WeatherProvider
 import java.time.Duration
@@ -37,7 +34,7 @@ import javax.inject.Singleton
 @Qualifier annotation class RainViewerRetrofit
 @Qualifier annotation class OpenWeatherRetrofit
 @Qualifier annotation class WeatherApiRetrofit
-@Qualifier annotation class YandexRetrofit
+@Qualifier annotation class GitHubApiRetrofit
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -117,9 +114,9 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    @YandexRetrofit
-    fun provideYandexRetrofit(client: OkHttpClient, json: Json): Retrofit =
-        retrofit(client, json, "https://api.weather.yandex.ru/")
+    @GitHubApiRetrofit
+    fun provideGitHubApiRetrofit(client: OkHttpClient, json: Json): Retrofit =
+        retrofit(client, json, "https://api.github.com/")
 
     @Provides
     @Singleton
@@ -153,21 +150,14 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideYandexApi(@YandexRetrofit retrofit: Retrofit): YandexWeatherApi =
-        retrofit.create(YandexWeatherApi::class.java)
-
-    @Provides
-    @Singleton
     fun provideProviderRegistry(
         openMeteo: OpenMeteoProvider,
         metNo: MetNoProvider,
         openWeather: OpenWeatherProvider,
-        weatherApiCom: WeatherApiComProvider,
-        yandex: YandexProvider,
-        gismeteo: GismeteoProvider
+        weatherApiCom: WeatherApiComProvider
     ): ProviderRegistry = ProviderRegistry(
         listOf<WeatherProvider>(
-            openMeteo, metNo, openWeather, weatherApiCom, yandex, gismeteo
+            openMeteo, metNo, openWeather, weatherApiCom
         )
     )
 

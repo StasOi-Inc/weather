@@ -14,7 +14,8 @@ import javax.inject.Inject
 data class RadarFrame(
     val timeSeconds: Long,
     val tileUrl: String,
-    val isNowcast: Boolean
+    val isNowcast: Boolean,
+    val offsetMinutes: Long
 )
 
 data class RadarUiState(
@@ -23,7 +24,10 @@ data class RadarUiState(
     val playing: Boolean = false,
     val location: SavedLocation? = null,
     val error: Boolean = false
-)
+) {
+    val nowIndex: Int
+        get() = frames.indexOfLast { !it.isNowcast }.coerceAtLeast(0)
+}
 
 @HiltViewModel
 class RadarViewModel @Inject constructor(
@@ -48,22 +52,30 @@ class RadarViewModel @Inject constructor(
             try {
                 val maps = rainViewerApi.weatherMaps()
                 val host = maps.host.ifBlank { "https://tilecache.rainviewer.com" }
-                val frames = (maps.radar.past.map { it to false } + maps.radar.nowcast.map { it to true })
+                val past = maps.radar.past.filter { it.path.isNotBlank() }
+                val referenceTime = past.lastOrNull()?.time
+                    ?: maps.radar.nowcast.lastOrNull()?.time
+                    ?: (System.currentTimeMillis() / 1000)
+                val frames = (past.map { it to false } + maps.radar.nowcast.map { it to true })
                     .mapNotNull { (frame, nowcast) ->
                         if (frame.path.isBlank()) null
                         else RadarFrame(
                             timeSeconds = frame.time,
                             tileUrl = "$host${frame.path}/256/{z}/{x}/{y}/2/1_1.png",
-                            isNowcast = nowcast
+                            isNowcast = nowcast,
+                            offsetMinutes = (frame.time - referenceTime) / 60
                         )
                     }
-                _state.value = _state.value.copy(
+                    .filter { it.offsetMinutes >= -60 }
+                val nowIndex = frames.indexOfLast { !it.isNowcast }.coerceAtLeast(0)
+                _state.value = RadarUiState(
                     frames = frames,
-                    currentIndex = (maps.radar.past.size - 1).coerceIn(0, (frames.size - 1).coerceAtLeast(0)),
+                    currentIndex = nowIndex,
+                    playing = false,
                     error = frames.isEmpty()
                 )
             } catch (e: Exception) {
-                _state.value = _state.value.copy(error = true)
+                _state.value = RadarUiState(error = true)
             }
         }
     }
@@ -86,7 +98,7 @@ class RadarViewModel @Inject constructor(
         if (s.frames.isEmpty()) return false
         val next = s.currentIndex + 1
         return if (next >= s.frames.size) {
-            _state.value = s.copy(currentIndex = 0)
+            _state.value = s.copy(currentIndex = s.nowIndex)
             true
         } else {
             _state.value = s.copy(currentIndex = next)

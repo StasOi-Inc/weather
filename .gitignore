@@ -10,3 +10,7 @@ build
 app/release
 *.jks
 *.keystore
+.kotlin/
+*.log
+Screenshot_*
+.rufp/

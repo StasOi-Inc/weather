@@ -28,12 +28,10 @@ android {
         applicationId = "ru.rufp.weather"
         minSdk = 26
         targetSdk = 35
-        versionCode = 2
-        versionName = "1.1"
+        versionCode = 3
+        versionName = "1.2"
         buildConfigField("String", "OWM_KEY", apiKey("openweathermap.key", "OWM_KEY"))
         buildConfigField("String", "WEATHERAPI_KEY", apiKey("weatherapi.key", "WEATHERAPI_KEY"))
-        buildConfigField("String", "YANDEX_KEY", apiKey("yandex.key", "YANDEX_KEY"))
-        buildConfigField("String", "GISMETEO_KEY", apiKey("gismeteo.key", "GISMETEO_KEY"))
     }
 
     signingConfigs {

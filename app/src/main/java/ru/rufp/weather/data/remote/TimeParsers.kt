@@ -1,7 +1,6 @@
 package ru.rufp.weather.data.remote
 
 import java.time.Instant
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -16,9 +15,4 @@ object TimeParsers {
     }
 
     fun metNoTime(value: String): Instant = Instant.parse(value)
-
-    fun yandexTime(date: String, hour: Int, zone: java.time.ZoneId): Instant {
-        val local = LocalDateTime.of(LocalDate.parse(date), java.time.LocalTime.of(hour.coerceIn(0, 23), 0))
-        return local.atZone(zone).toInstant()
-    }
 }

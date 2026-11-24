@@ -4,7 +4,6 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 import ru.rufp.weather.data.remote.dto.OpenWeatherForecastResponse
 import ru.rufp.weather.data.remote.dto.WeatherApiForecastResponse
-import ru.rufp.weather.data.remote.dto.YandexForecastResponse
 
 interface OpenWeatherApi {
 
@@ -27,14 +26,4 @@ interface WeatherApiComApi {
         @Query("aqi") aqi: String = "no",
         @Query("alerts") alerts: String = "no"
     ): WeatherApiForecastResponse
-}
-
-interface YandexWeatherApi {
-
-    @GET("v2/forecast")
-    suspend fun forecast(
-        @Query("lat") lat: Double,
-        @Query("lon") lon: Double,
-        @Query("hours") hours: Boolean = true
-    ): YandexForecastResponse
 }
