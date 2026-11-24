@@ -1,8 +1,10 @@
 package ru.rufp.weather.update
 
+import kotlinx.serialization.Serializable
 import javax.inject.Inject
 import javax.inject.Singleton
 
+@Serializable
 data class UpdateInfo(
     val versionName: String,
     val versionCode: Long,
