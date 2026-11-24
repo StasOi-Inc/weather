@@ -23,6 +23,24 @@ jobs:
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "platforms;android-35" "build-tools;34.0.0" "build-tools;35.0.0"
       - uses: gradle/actions/setup-gradle@v4
+      - name: Install gh CLI
+        run: |
+          if [ -x "$HOME/.macbuild/bin/gh" ]; then
+            echo "gh already installed"
+          else
+            case "$(uname -m)" in
+              arm64) GH_ARCH="macOS_arm64" ;;
+              *) GH_ARCH="macOS_amd64" ;;
+            esac
+            mkdir -p "$HOME/.macbuild/bin"
+            curl -sSL -o "$HOME/.macbuild/gh.zip" \
+              "https://github.com/cli/cli/releases/download/v2.62.0/gh_2.62.0_${GH_ARCH}.zip"
+            unzip -oq "$HOME/.macbuild/gh.zip" -d "$HOME/.macbuild/gh-unzip"
+            cp "$HOME/.macbuild/gh-unzip/gh_2.62.0_${GH_ARCH}/bin/gh" "$HOME/.macbuild/bin/gh"
+            rm -rf "$HOME/.macbuild/gh-unzip" "$HOME/.macbuild/gh.zip"
+            "$HOME/.macbuild/bin/gh" --version
+          fi
+          echo "$HOME/.macbuild/bin" >> "$GITHUB_PATH"
       - name: Run unit tests
         run: |
           if [ -f ~/.macbuild/env.sh ]; then . ~/.macbuild/env.sh; fi
@@ -93,6 +111,24 @@ jobs:
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "platforms;android-35" "build-tools;34.0.0" "build-tools;35.0.0"
       - uses: gradle/actions/setup-gradle@v4
+      - name: Install gh CLI
+        run: |
+          if [ -x "$HOME/.macbuild/bin/gh" ]; then
+            echo "gh already installed"
+          else
+            case "$(uname -m)" in
+              arm64) GH_ARCH="macOS_arm64" ;;
+              *) GH_ARCH="macOS_amd64" ;;
+            esac
+            mkdir -p "$HOME/.macbuild/bin"
+            curl -sSL -o "$HOME/.macbuild/gh.zip" \
+              "https://github.com/cli/cli/releases/download/v2.62.0/gh_2.62.0_${GH_ARCH}.zip"
+            unzip -oq "$HOME/.macbuild/gh.zip" -d "$HOME/.macbuild/gh-unzip"
+            cp "$HOME/.macbuild/gh-unzip/gh_2.62.0_${GH_ARCH}/bin/gh" "$HOME/.macbuild/bin/gh"
+            rm -rf "$HOME/.macbuild/gh-unzip" "$HOME/.macbuild/gh.zip"
+            "$HOME/.macbuild/bin/gh" --version
+          fi
+          echo "$HOME/.macbuild/bin" >> "$GITHUB_PATH"
       - run: |
           if [ -f ~/.macbuild/env.sh ]; then . ~/.macbuild/env.sh; fi
           ./gradlew :app:assembleRelease
@@ -112,25 +148,14 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -e
-          API="https://api.github.com/repos/${GITHUB_REPOSITORY}"
-          AUTH="Authorization: Bearer $GH_TOKEN"
-          RELEASE_ID=$(curl -sS -H "$AUTH" "$API/releases/tags/${GITHUB_REF_NAME}" | \
-            sed -n 's/.*"id": *\([0-9]*\).*/\1/p' | head -1)
-          if [ -z "$RELEASE_ID" ]; then
-            CREATE=$(curl -sS -X POST -H "$AUTH" -H "Accept: application/vnd.github+json" \
-              "$API/releases" \
-              -d "{\"tag_name\":\"${GITHUB_REF_NAME}\",\"name\":\"Weather ${GITHUB_REF_NAME}\",\"generate_release_notes\":true}")
-            RELEASE_ID=$(printf '%s' "$CREATE" | sed -n 's/.*"id": *\([0-9]*\).*/\1/p' | head -1)
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --clobber "$APK_NAME" "${APK_NAME}.sha256"
+          else
+            gh release create "$GITHUB_REF_NAME" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "Weather $GITHUB_REF_NAME" \
+              --generate-notes \
+              "$APK_NAME" "${APK_NAME}.sha256"
           fi
-          if [ -z "$RELEASE_ID" ]; then
-            echo "Failed to resolve release id"
-            exit 1
-          fi
-          UPLOAD="https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}/assets"
-          curl -sS -X POST -H "$AUTH" -H "Content-Type: application/vnd.android.package-archive" \
-            --data-binary @"$APK_NAME" "$UPLOAD?name=${APK_NAME}"
-          curl -sS -X POST -H "$AUTH" -H "Content-Type: text/plain" \
-            --data-binary @"${APK_NAME}.sha256" "$UPLOAD?name=${APK_NAME}.sha256"
-          ASSETS=$(curl -sS -H "$AUTH" "$API/releases/${RELEASE_ID}/assets" | grep -c '"name":')
-          echo "uploaded assets: $ASSETS"
-          [ "$ASSETS" -ge 2 ] || exit 1
+          gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" \
+            --json assets --jq '.assets[].name'
