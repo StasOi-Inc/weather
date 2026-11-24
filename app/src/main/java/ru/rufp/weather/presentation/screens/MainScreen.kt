@@ -219,7 +219,7 @@ private fun HeroBlock(forecast: CachedForecast, context: android.content.Context
                 Spacer(Modifier.width(16.dp))
                 Column {
                     PrecipIcon(
-                        type = current.type,
+                        type = current.type.toPrecipType(),
                         modifier = Modifier.size(40.dp)
                     )
                     Text(
@@ -308,7 +308,7 @@ private fun HourColumn(hour: CachedHour, context: android.content.Context) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(hhmmOf(hour.timeEpochMillis), style = MaterialTheme.typography.labelMedium)
-            PrecipIcon(type = hour.type, modifier = Modifier.size(22.dp))
+            PrecipIcon(type = hour.type.toPrecipType(), modifier = Modifier.size(22.dp))
             Text(Format.temperature(hour.temperature), style = MaterialTheme.typography.titleMedium)
             ProbabilityBar(hour.probability)
             Text(Format.probability(hour.probability), style = MaterialTheme.typography.labelSmall)
@@ -344,3 +344,6 @@ private val hhmmFormatter = DateTimeFormatter.ofPattern("HH:mm", Locale.getDefau
 
 private fun hhmmOf(epochMillis: Long): String =
     hhmmFormatter.format(Instant.ofEpochMilli(epochMillis).atZone(ZoneId.systemDefault()))
+
+private fun String.toPrecipType(): PrecipType =
+    runCatching { PrecipType.valueOf(this) }.getOrDefault(PrecipType.NONE)

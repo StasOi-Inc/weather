@@ -2,13 +2,13 @@ package ru.rufp.weather.presentation.icons
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AcUnit
-import androidx.compose.material.icons.filled.CloudySnowing
 import androidx.compose.material.icons.filled.Grain
 import androidx.compose.material.icons.filled.Hail
-import androidx.compose.material.icons.filled.Rainy
 import androidx.compose.material.icons.filled.SevereCold
 import androidx.compose.material.icons.filled.Thunderstorm
 import androidx.compose.material.icons.filled.Umbrella
+import androidx.compose.material.icons.filled.Water
+import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -22,10 +22,10 @@ object PrecipIcons {
     fun imageVector(type: PrecipType): ImageVector = when (type) {
         PrecipType.NONE -> Icons.Filled.WbSunny
         PrecipType.DRIZZLE -> Icons.Filled.Grain
-        PrecipType.RAIN -> Icons.Filled.Rainy
+        PrecipType.RAIN -> Icons.Filled.WaterDrop
         PrecipType.HEAVY_RAIN -> Icons.Filled.Umbrella
         PrecipType.SNOW -> Icons.Filled.AcUnit
-        PrecipType.WET_SNOW -> Icons.Filled.CloudySnowing
+        PrecipType.WET_SNOW -> Icons.Filled.Water
         PrecipType.FREEZING_RAIN -> Icons.Filled.SevereCold
         PrecipType.HAIL -> Icons.Filled.Hail
         PrecipType.THUNDERSTORM -> Icons.Filled.Thunderstorm
