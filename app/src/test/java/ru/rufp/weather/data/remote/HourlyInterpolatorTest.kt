@@ -31,12 +31,13 @@ class HourlyInterpolatorTest {
         val result = HourlyInterpolator.interpolateToHourly(
             listOf(point(0, 0.0, 10.0), point(3, 0.6, 13.0))
         )
-        assertEquals(3, result.size)
+        assertEquals(4, result.size)
         assertEquals(base, result[0].time)
         assertEquals(base.plus(1, ChronoUnit.HOURS), result[1].time)
+        assertEquals(base.plus(3, ChronoUnit.HOURS), result[3].time)
         assertEquals(0.2, result[1].precipProbability!!, 1e-9)
         assertEquals(11.0, result[1].temperature!!, 1e-9)
-        assertEquals(10.0, result[2].precipProbability!!, 1e-9)
+        assertEquals(0.4, result[2].precipProbability!!, 1e-9)
     }
 
     @Test
@@ -72,6 +73,6 @@ class HourlyInterpolatorTest {
             listOf(point(0, 0.0, 10.0), point(3, 0.3, 11.0))
         )
         assertNull(result.firstOrNull { it.time.isAfter(base.plus(3, ChronoUnit.HOURS)) })
-        assertEquals(3, result.size)
+        assertEquals(4, result.size)
     }
 }

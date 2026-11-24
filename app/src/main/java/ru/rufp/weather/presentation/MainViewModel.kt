@@ -2,14 +2,15 @@ package ru.rufp.weather.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import android.content.Context
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import ru.rufp.weather.BuildConfig
 import ru.rufp.weather.data.repository.CachedForecast
 import ru.rufp.weather.data.repository.ForecastCache
 import ru.rufp.weather.data.repository.ForecastRepository
@@ -37,6 +38,7 @@ data class MainUiState(
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val forecastRepository: ForecastRepository,
     private val locationRepository: LocationRepository,
     private val cache: ForecastCache,
@@ -99,7 +101,7 @@ class MainViewModel @Inject constructor(
     fun checkForUpdates() {
         viewModelScope.launch {
             _state.value = _state.value.copy(updateChecking = true, updateFailed = false, updateUpToDate = false)
-            val currentCode = BuildConfig.VERSION_CODE.toLong()
+            val currentCode = appVersionCode()
             val result = try {
                 updateChecker.check(currentCode)
             } catch (e: kotlinx.coroutines.CancellationException) {
@@ -183,5 +185,18 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             locationRepository.delete(id)
         }
+    }
+
+    private fun appVersionCode(): Long = try {
+        context.packageManager.getPackageInfo(context.packageName, 0).let { pi ->
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                pi.longVersionCode
+            } else {
+                @Suppress("DEPRECATION")
+                pi.versionCode.toLong()
+            }
+        }
+    } catch (e: Exception) {
+        0L
     }
 }
