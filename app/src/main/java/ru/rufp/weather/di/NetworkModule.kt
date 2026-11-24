@@ -145,6 +145,11 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    fun provideGitHubReleaseApi(@GitHubApiRetrofit retrofit: Retrofit): ru.rufp.weather.update.GitHubReleaseApi =
+        retrofit.create(ru.rufp.weather.update.GitHubReleaseApi::class.java)
+
+    @Provides
+    @Singleton
     fun provideWeatherApiComApi(@WeatherApiRetrofit retrofit: Retrofit): WeatherApiComApi =
         retrofit.create(WeatherApiComApi::class.java)
 
