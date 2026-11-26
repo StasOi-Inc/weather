@@ -56,6 +56,7 @@ class MainViewModel @Inject constructor(
     val availableUpdate: Flow<UpdateInfo?> = updateStorage.available()
 
     init {
+        viewModelScope.launch { updateStorage.purgeOutdated() }
         viewModelScope.launch {
             locationRepository.ensureDefaultLocation()
             locationRepository.locations().collect { locations ->
@@ -122,6 +123,7 @@ class MainViewModel @Inject constructor(
             } else {
                 _state.value = _state.value.copy(updateChecking = false, updateFailed = true)
             }
+            updateStorage.purgeOutdated()
         }
     }
 
@@ -187,16 +189,5 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    private fun appVersionCode(): Long = try {
-        context.packageManager.getPackageInfo(context.packageName, 0).let { pi ->
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-                pi.longVersionCode
-            } else {
-                @Suppress("DEPRECATION")
-                pi.versionCode.toLong()
-            }
-        }
-    } catch (e: Exception) {
-        0L
-    }
+    private fun appVersionCode(): Long = updateStorage.installedVersionCode()
 }

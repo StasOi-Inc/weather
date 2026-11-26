@@ -27,9 +27,30 @@ class UpdateStorage @Inject constructor(
     private val checkedAtKey = longPreferencesKey("checked_at")
 
     fun available(): Flow<UpdateInfo?> = context.UpdateDataStore.data.map { prefs ->
-        prefs[infoKey]?.let { raw ->
+        val info = prefs[infoKey]?.let { raw ->
             runCatching { json.decodeFromString<UpdateInfo>(raw) }.getOrNull()
         }
+        info?.takeUnless { isOutdated(it, installedVersionCode()) }
+    }
+
+    suspend fun purgeOutdated() {
+        val stale = context.UpdateDataStore.data.first()[infoKey]?.let { raw ->
+            runCatching { json.decodeFromString<UpdateInfo>(raw) }.getOrNull()
+        } ?: return
+        if (isOutdated(stale, installedVersionCode())) clear()
+    }
+
+    fun installedVersionCode(): Long = try {
+        context.packageManager.getPackageInfo(context.packageName, 0).let { pi ->
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                pi.longVersionCode
+            } else {
+                @Suppress("DEPRECATION")
+                pi.versionCode.toLong()
+            }
+        }
+    } catch (e: Exception) {
+        0L
     }
 
     suspend fun save(update: UpdateInfo) {
@@ -50,5 +71,10 @@ class UpdateStorage @Inject constructor(
 
     fun downloadFile(): File = File(context.cacheDir, "update/Weather-update.apk").also {
         it.parentFile?.mkdirs()
+    }
+
+    companion object {
+        fun isOutdated(info: UpdateInfo, installedVersionCode: Long): Boolean =
+            info.versionCode <= installedVersionCode
     }
 }

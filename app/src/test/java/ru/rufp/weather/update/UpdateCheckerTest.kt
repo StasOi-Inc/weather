@@ -1,8 +1,10 @@
 package ru.rufp.weather.update
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class UpdateCheckerTest {
@@ -45,5 +47,23 @@ class UpdateCheckerTest {
     @Test
     fun nonNumericCodeIgnored() {
         assertNull(UpdateChecker.parseRelease(release("Weather-v1.2-x-release.apk")))
+    }
+
+    @Test
+    fun outdatedInfoDetectedWhenInstalledCodeGreater() {
+        val info = UpdateInfo("1.2", 3L, "https://example.com/a.apk", null, 10_000_000L)
+        assertTrue(UpdateStorage.isOutdated(info, 4L))
+    }
+
+    @Test
+    fun equalCodeIsOutdated() {
+        val info = UpdateInfo("1.2", 4L, "https://example.com/a.apk", null, 10_000_000L)
+        assertTrue(UpdateStorage.isOutdated(info, 4L))
+    }
+
+    @Test
+    fun newerInfoIsNotOutdated() {
+        val info = UpdateInfo("1.3", 5L, "https://example.com/a.apk", null, 10_000_000L)
+        assertFalse(UpdateStorage.isOutdated(info, 4L))
     }
 }
