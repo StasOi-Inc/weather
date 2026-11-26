@@ -23,10 +23,12 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,6 +59,7 @@ interface UpdateEntryPoint {
     fun installer(): ru.rufp.weather.update.UpdateInstaller
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(viewModel: MainViewModel, modifier: Modifier = Modifier) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -70,13 +73,18 @@ fun MainScreen(viewModel: MainViewModel, modifier: Modifier = Modifier) {
     val availableUpdate by viewModel.availableUpdate.collectAsStateWithLifecycle(null)
     var showUpdateDialog by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+    PullToRefreshBox(
+        isRefreshing = state.loading,
+        onRefresh = { viewModel.refresh() },
+        modifier = modifier.fillMaxSize()
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = forecast?.locationName ?: stringResource(R.string.app_name),
@@ -120,7 +128,6 @@ fun MainScreen(viewModel: MainViewModel, modifier: Modifier = Modifier) {
             }
             return@Column
         }
-
         val issued = Instant.ofEpochMilli(forecast.issuedAtEpochMillis)
         Text(
             stringResource(R.string.data_from, Format.hhmm(issued)),
@@ -191,6 +198,7 @@ fun MainScreen(viewModel: MainViewModel, modifier: Modifier = Modifier) {
                     )
                 }
             }
+        }
         }
     }
 

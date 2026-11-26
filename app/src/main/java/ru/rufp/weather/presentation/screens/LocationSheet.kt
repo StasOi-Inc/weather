@@ -140,17 +140,6 @@ fun LocationSheet(viewModel: MainViewModel, onDismiss: () -> Unit) {
                     )
                 }
 
-                TextButton(
-                    onClick = { viewModel.checkForUpdates() },
-                    enabled = !state.updateChecking,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        if (state.updateChecking) stringResource(R.string.update_checking)
-                        else stringResource(R.string.update_check)
-                    )
-                }
-
                 if (state.locations.isEmpty()) {
                     Text(stringResource(R.string.no_saved_locations), style = MaterialTheme.typography.bodySmall)
                 } else {

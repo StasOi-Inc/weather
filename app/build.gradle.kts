@@ -13,7 +13,6 @@ val localProps = Properties().apply {
     val f = rootProject.file("local.properties")
     if (f.exists()) f.inputStream().use { load(it) }
 }
-
 fun apiKey(name: String, envName: String): String =
     "\"" + (System.getenv(envName) ?: localProps.getProperty(name) ?: "") + "\""
 
@@ -114,7 +113,6 @@ dependencies {
     implementation(libs.glance.appwidget)
     implementation(libs.glance.material3)
     implementation(libs.datastore.preferences)
-    implementation(libs.maplibre.sdk)
 
     testImplementation(libs.junit)
 }

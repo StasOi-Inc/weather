@@ -14,7 +14,6 @@ import ru.rufp.weather.BuildConfig
 import ru.rufp.weather.data.remote.MetNoApi
 import ru.rufp.weather.data.remote.OpenMeteoApi
 import ru.rufp.weather.data.remote.OpenMeteoGeocodingApi
-import ru.rufp.weather.data.remote.RainViewerApi
 import ru.rufp.weather.data.remote.WeatherApiComApi
 import ru.rufp.weather.data.remote.OpenWeatherApi
 import ru.rufp.weather.data.remote.provider.MetNoProvider
@@ -31,7 +30,6 @@ import javax.inject.Singleton
 @Qualifier annotation class OpenMeteoRetrofit
 @Qualifier annotation class GeocodingRetrofit
 @Qualifier annotation class MetNoRetrofit
-@Qualifier annotation class RainViewerRetrofit
 @Qualifier annotation class OpenWeatherRetrofit
 @Qualifier annotation class WeatherApiRetrofit
 @Qualifier annotation class GitHubApiRetrofit
@@ -96,12 +94,6 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    @RainViewerRetrofit
-    fun provideRainViewerRetrofit(client: OkHttpClient, json: Json): Retrofit =
-        retrofit(client, json, "https://api.rainviewer.com/")
-
-    @Provides
-    @Singleton
     @OpenWeatherRetrofit
     fun provideOpenWeatherRetrofit(client: OkHttpClient, json: Json): Retrofit =
         retrofit(client, json, "https://api.openweathermap.org/")
@@ -132,11 +124,6 @@ object NetworkModule {
     @Singleton
     fun provideMetNoApi(@MetNoRetrofit retrofit: Retrofit): MetNoApi =
         retrofit.create(MetNoApi::class.java)
-
-    @Provides
-    @Singleton
-    fun provideRainViewerApi(@RainViewerRetrofit retrofit: Retrofit): RainViewerApi =
-        retrofit.create(RainViewerApi::class.java)
 
     @Provides
     @Singleton

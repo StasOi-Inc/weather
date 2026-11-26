@@ -19,7 +19,3 @@
 -keep,allowobfuscation interface <1>
 -keep,allowobfuscation,allowshrinking class kotlin.coroutines.Continuation
 -keep,allowobfuscation,allowshrinking class retrofit2.Response
-
-# MapLibre
--keep class org.maplibre.android.** { *; }
--dontwarn org.maplibre.android.**

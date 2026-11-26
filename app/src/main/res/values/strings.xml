@@ -5,7 +5,7 @@
 
     <string name="tab_now">Погода</string>
     <string name="tab_sources">Источники</string>
-    <string name="tab_radar">Радар</string>
+    <string name="tab_about">?</string>
 
     <string name="now_title">Сейчас</string>
     <string name="feels_like">Ощущается: %1$s</string>
@@ -69,17 +69,15 @@
     <string name="no_saved_locations">Нет сохранённых локаций. Найдите город</string>
     <string name="geocoding_not_found">Город не найден</string>
 
-    <string name="radar_title">Карта осадков</string>
-    <string name="radar_play">Воспроизвести</string>
-    <string name="radar_pause">Пауза</string>
-    <string name="radar_now">Сейчас</string>
-    <string name="radar_minus">−%1$s мин</string>
-    <string name="radar_plus">+%1$s мин</string>
-    <string name="radar_no_frames">Данные радаров недоступны</string>
-    <string name="radar_legend">Осадки</string>
-    <string name="radar_forecast_chip">Прогноз</string>
-    <string name="radar_legend_weak">слабые</string>
-    <string name="radar_legend_strong">сильные</string>
+    <string name="about_version">Версия: %1$s</string>
+    <string name="about_description">Агрегированный прогноз осадков: приложение опрашивает несколько сервисов погоды, накапливает статистику их точности для вашей локации и взвешивает источники по точности</string>
+    <string name="about_releases">Релизы на GitHub</string>
+    <string name="about_readme">Описание проекта</string>
+    <string name="about_latest_version">Последний релиз: %1$s</string>
+    <string name="about_stats_title">Статистика источников</string>
+    <string name="about_observations">Наблюдений: %1$d из %2$d</string>
+    <string name="about_warmup_badge">идёт накопление</string>
+    <string name="about_weight_value">вес %1$s</string>
 
     <string name="update_available">Доступна версия %1$s</string>
     <string name="update_check">Проверить обновления</string>
@@ -97,5 +95,4 @@
     <string name="widget_no_data">Нет данных</string>
     <string name="cd_precip_icon">Значок осадков: %1$s</string>
     <string name="cd_chart_temperature">График температуры на 24 часа</string>
-    <string name="cd_radar_map">Карта радаров осадков</string>
 </resources>

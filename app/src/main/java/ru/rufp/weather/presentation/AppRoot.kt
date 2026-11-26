@@ -8,7 +8,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloudQueue
-import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.Source
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -20,12 +20,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ru.rufp.weather.R
+import ru.rufp.weather.presentation.screens.AboutScreen
 import ru.rufp.weather.presentation.screens.LocationSheet
 import ru.rufp.weather.presentation.screens.MainScreen
-import ru.rufp.weather.presentation.screens.RadarScreen
 import ru.rufp.weather.presentation.screens.SourcesScreen
 
-private enum class Tab { NOW, SOURCES, RADAR }
+private enum class Tab { NOW, SOURCES, ABOUT }
 
 @Composable
 fun AppRoot(mainViewModel: MainViewModel = hiltViewModel()) {
@@ -48,10 +48,10 @@ fun AppRoot(mainViewModel: MainViewModel = hiltViewModel()) {
                     label = { Text(stringResource(R.string.tab_sources)) }
                 )
                 NavigationBarItem(
-                    selected = tab == Tab.RADAR,
-                    onClick = { tab = Tab.RADAR },
-                    icon = { Icon(Icons.Filled.Map, contentDescription = null) },
-                    label = { Text(stringResource(R.string.tab_radar)) }
+                    selected = tab == Tab.ABOUT,
+                    onClick = { tab = Tab.ABOUT },
+                    icon = { Icon(Icons.Filled.HelpOutline, contentDescription = null) },
+                    label = { Text(stringResource(R.string.tab_about)) }
                 )
             }
         }
@@ -60,7 +60,7 @@ fun AppRoot(mainViewModel: MainViewModel = hiltViewModel()) {
         when (tab) {
             Tab.NOW -> MainScreen(mainViewModel, modifier)
             Tab.SOURCES -> SourcesScreen(modifier)
-            Tab.RADAR -> RadarScreen(modifier)
+            Tab.ABOUT -> AboutScreen(modifier)
         }
     }
 

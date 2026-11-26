@@ -14,9 +14,3 @@ interface MetNoApi {
         @Query("lon") lon: Double
     ): MetNoResponse
 }
-
-interface RainViewerApi {
-
-    @GET("public/weather-maps.json")
-    suspend fun weatherMaps(): ru.rufp.weather.data.remote.dto.RainViewerMaps
-}
