@@ -153,6 +153,7 @@ class ForecastRepositoryImpl @Inject constructor(
 
         if (successful.isEmpty()) return false
 
+        runCatching { recomputeMetrics() }
         val aggregated = aggregate(location, now)
         cache.save(aggregated.toCached())
         return true

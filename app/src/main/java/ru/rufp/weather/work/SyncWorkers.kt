@@ -85,6 +85,7 @@ class ForecastSyncWorker @AssistedInject constructor(
         } catch (e: kotlinx.coroutines.CancellationException) {
             throw e
         } catch (e: Exception) {
+            android.util.Log.w("ForecastSyncWorker", "sync failed", e)
             return Result.success()
         }
         return Result.success()
@@ -104,6 +105,7 @@ class WeightRecalcWorker @AssistedInject constructor(
         } catch (e: kotlinx.coroutines.CancellationException) {
             throw e
         } catch (e: Exception) {
+            android.util.Log.w("WeightRecalcWorker", "recompute failed", e)
             return Result.success()
         }
         return Result.success()
